@@ -54,12 +54,8 @@ function createWindow(showOnReady = false) {
     }
   });
 
-  mainWindow.on('close', (event) => {
-    if (!isQuitting) {
-      event.preventDefault();
-      mainWindow.hide();
-      return false;
-    }
+  mainWindow.on('close', () => {
+    app.quit();
   });
 
   updateTray();
@@ -776,24 +772,15 @@ ipcMain.handle('dictation:toggle', () => {
 
 // App Lifecycle
 app.whenReady().then(async () => {
-  // Register as a Login Item so Wispr Studio auto-starts at login
-  // This persists the setting — only sets it once if not already enabled
+  // Explicitly ensure the app never starts at login
   try {
-    const loginSettings = app.getLoginItemSettings();
-    if (!loginSettings.openAtLogin) {
-      app.setLoginItemSettings({
-        openAtLogin: true,
-        openAsHidden: true  // Start without showing any window
-      });
-    }
-  } catch (e) {
-    console.warn('Could not set login item:', e.message);
-  }
+    app.setLoginItemSettings({
+      openAtLogin: false
+    });
+  } catch (e) {}
 
-  createTrayIcon();
-  createHudWindow();
-  registerGlobalHotkeys();
-  setupOpenWisprWatcher();
+  // Open the main transcription window immediately when launched
+  openMainWindow();
 
   // Sync Deepgram API Key from .env.local if available
   try {
@@ -803,18 +790,6 @@ app.whenReady().then(async () => {
     }
   } catch (e) {}
 
-  // Auto-start voice dictation daemon in background with user's configured model
-  try {
-    const status = await wisprService.checkDaemonRunning();
-    if (!status.running) {
-      await wisprService.startDaemon();
-    }
-    updateTray();
-  } catch (e) {
-    console.error('Error auto-starting daemon:', e);
-  }
-
-  // NOTE: MainWindow is NOT opened at startup, keeping memory and CPU footprint near zero.
   app.on('activate', () => {
     openMainWindow();
   });
@@ -822,15 +797,12 @@ app.whenReady().then(async () => {
 
 app.on('before-quit', () => {
   isQuitting = true;
-  globalShortcut.unregisterAll();
   if (activeDictationProc) {
     try { activeDictationProc.kill('SIGKILL'); } catch (e) {}
   }
 });
 
 app.on('window-all-closed', () => {
-  // On macOS keep app running in tray unless explicit quit
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  // Quit completely when window is closed (zero background memory/CPU)
+  app.quit();
 });
