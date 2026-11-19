@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Production builds & binaries
+dist/
+*.zip
+*.tar.gz
+
+# Environment files & Secrets
+.env
+.env.*
+!.env.example
+
+# Logs & Scratch
+*.log
+scratch/
+
+# OS files
+.DS_Store
+Thumbs.db
