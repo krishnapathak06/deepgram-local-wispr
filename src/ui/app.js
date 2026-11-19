@@ -71,8 +71,9 @@ const exportMenu = document.getElementById('export-menu');
 // Settings Elements
 const saveSettingsBtn = document.getElementById('save-settings-btn');
 const settingEngine = document.getElementById('setting-engine');
+const settingDeepgramKey = document.getElementById('setting-deepgram-key');
+const toggleKeyVisibilityBtn = document.getElementById('toggle-key-visibility-btn');
 const settingDeepgramStatus = document.getElementById('setting-deepgram-status');
-const settingDeepgramBadge = document.getElementById('setting-deepgram-badge');
 const settingHotkey = document.getElementById('setting-hotkey');
 const settingToggleMode = document.getElementById('setting-toggle-mode');
 const settingModel = document.getElementById('setting-model');
@@ -217,19 +218,20 @@ function updateConfigUI(config) {
   if (settingLanguage && config.language) settingLanguage.value = config.language;
   if (settingModel && config.modelSize) settingModel.value = config.modelSize;
 
+  if (settingDeepgramKey && config.deepgramApiKey) {
+    settingDeepgramKey.value = config.deepgramApiKey;
+  }
+
   if (settingDeepgramStatus) {
-    if (config.deepgramApiKey) {
-      settingDeepgramStatus.textContent = 'Active • Key loaded from .env.local';
-      if (settingDeepgramBadge) {
-        settingDeepgramBadge.textContent = 'Configured in .env.local ✓';
-        settingDeepgramBadge.style.color = '#10b981';
-      }
+    if (config.deepgramApiKey && config.deepgramApiKey.trim()) {
+      const masked = config.deepgramApiKey.length > 8
+        ? config.deepgramApiKey.slice(0, 4) + '••••••••' + config.deepgramApiKey.slice(-4)
+        : '••••••••';
+      settingDeepgramStatus.textContent = `Active: ${masked}`;
+      settingDeepgramStatus.style.color = '#10b981';
     } else {
-      settingDeepgramStatus.textContent = 'Missing DEEPGRAM_API_KEY in .env.local';
-      if (settingDeepgramBadge) {
-        settingDeepgramBadge.textContent = 'Key Missing';
-        settingDeepgramBadge.style.color = '#f59e0b';
-      }
+      settingDeepgramStatus.textContent = 'No key set. Enter a Deepgram API Key for cloud transcription.';
+      settingDeepgramStatus.style.color = '#94a3b8';
     }
   }
 
@@ -411,11 +413,24 @@ function setupDaemonControls() {
 
 // Settings Form Handling
 function setupSettingsForm() {
+  if (toggleKeyVisibilityBtn && settingDeepgramKey) {
+    toggleKeyVisibilityBtn.addEventListener('click', () => {
+      if (settingDeepgramKey.type === 'password') {
+        settingDeepgramKey.type = 'text';
+        toggleKeyVisibilityBtn.textContent = 'Hide';
+      } else {
+        settingDeepgramKey.type = 'password';
+        toggleKeyVisibilityBtn.textContent = 'Show';
+      }
+    });
+  }
+
   if (saveSettingsBtn) {
     saveSettingsBtn.addEventListener('click', async (e) => {
       e.preventDefault();
       const updated = {
         transcriptionEngine: settingEngine ? settingEngine.value : 'deepgram',
+        deepgramApiKey: settingDeepgramKey ? settingDeepgramKey.value.trim() : '',
         modelSize: settingModel ? settingModel.value : 'base.en',
         toggleMode: settingToggleMode ? settingToggleMode.checked : true,
         language: settingLanguage ? settingLanguage.value : 'en',

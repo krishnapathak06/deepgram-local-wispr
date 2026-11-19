@@ -28,6 +28,7 @@ A native macOS application and dashboard designed for **Open-Wispr** voice dicta
 - **Menubar Tray Companion**: Native macOS menubar tray icon with quick start/stop and instant dictation model switching.
 
 ### 3. ⚙️ Complete Settings Configuration
+- **Deepgram API Key**: Configurable directly from the in-app Settings UI (with Show/Hide toggle) or via `.env.local` / environment variables.
 - **Push-to-Talk Hotkey**: Easily select `Globe / fn key`, `Right Option`, `F5`, `Ctrl + Space`, or custom keys.
 - **Toggle Mode**: Toggle between tap-to-talk (start/stop) or push-and-hold.
 - **Microphone Selection**: Choose between built-in MacBook microphones or external USB/Bluetooth mics.

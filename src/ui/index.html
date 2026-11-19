@@ -291,11 +291,12 @@
 
             <div class="setting-row">
               <div class="setting-meta">
-                <label>Deepgram API Key</label>
-                <span id="setting-deepgram-status">Checking .env.local...</span>
+                <label for="setting-deepgram-key">Deepgram API Key</label>
+                <span id="setting-deepgram-status">Cloud Nova-2 transcription key</span>
               </div>
-              <div class="setting-ctrl">
-                <span id="setting-deepgram-badge" style="display:inline-block; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">Configured in .env.local ✓</span>
+              <div class="setting-ctrl" style="display:flex; gap:8px; align-items:center;">
+                <input type="password" id="setting-deepgram-key" placeholder="Paste Deepgram API Key (or set in .env.local)" autocomplete="off" spellcheck="false" style="flex:1; padding: 7px 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-family: monospace; font-size: 13px;">
+                <button type="button" id="toggle-key-visibility-btn" class="btn-secondary" style="padding: 6px 12px; font-size: 12px; cursor: pointer; white-space:nowrap;">Show</button>
               </div>
             </div>
 

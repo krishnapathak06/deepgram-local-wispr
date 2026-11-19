@@ -59,15 +59,28 @@ function ensureDirs() {
 
 function getConfig() {
   ensureDirs();
+  let cfg = { ...DEFAULT_CONFIG };
   try {
     if (fs.existsSync(CONFIG_FILE)) {
       const data = fs.readFileSync(CONFIG_FILE, 'utf8');
-      return JSON.parse(data);
+      cfg = { ...cfg, ...JSON.parse(data) };
     }
   } catch (err) {
     console.error('Error reading config file:', err);
   }
-  return { ...DEFAULT_CONFIG };
+
+  // If key is not in config.json yet, attempt to load from environment or .env.local
+  if (!cfg.deepgramApiKey) {
+    try {
+      const deepgramService = require('./deepgramService');
+      const key = deepgramService.getApiKey();
+      if (key) {
+        cfg.deepgramApiKey = key;
+      }
+    } catch (e) {}
+  }
+
+  return cfg;
 }
 
 function saveConfig(newConfig) {
@@ -76,6 +89,11 @@ function saveConfig(newConfig) {
     const current = getConfig();
     const merged = { ...current, ...newConfig };
     fs.writeFileSync(CONFIG_FILE, JSON.stringify(merged, null, 2), 'utf8');
+
+    if (newConfig.deepgramApiKey !== undefined) {
+      process.env.DEEPGRAM_API_KEY = newConfig.deepgramApiKey;
+    }
+
     return { success: true, config: merged };
   } catch (err) {
     console.error('Error saving config file:', err);
